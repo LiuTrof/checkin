@@ -1,4 +1,20 @@
 import { fetch, setGlobalDispatcher, Agent } from 'undici'
+import fetch from 'node-fetch';  // 使用 node-fetch 代替 undici
+
+const testConnection = async () => {
+  try {
+    const response = await fetch('https://glados.rocks');
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    console.log('Connection successful');
+  } catch (error) {
+    console.error('Connection failed:', error);
+  }
+};
+
+testConnection();
+
 
 setGlobalDispatcher(new Agent({
   connect: { timeout: 10000 } // 设置超时时间为 10 秒
