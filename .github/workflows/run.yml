@@ -19,18 +19,18 @@ jobs:
       - name: Run main.js with timeout
         id: run-main
         run: |
-          timeout 180 npm run main || exit 1
+          timeout 180 npm run main
         env:
           GLADOS: ${{ secrets.GLADOS }}
           NOTIFY: ${{ secrets.NOTIFY }}
+        continue-on-error: true
       - name: Set retry flag if script failed or timed out
         if: failure()
-        run: echo "::set-output name=retry::true"
-        id: check-failure
-  
+        run: echo "retry=true" >> $GITHUB_ENV
+
   retry:
     needs: run
-    if: needs.run.outputs.retry == 'true'
+    if: ${{ env.retry == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Install GitHub CLI
@@ -42,6 +42,6 @@ jobs:
       - name: Authenticate GitHub CLI
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh auth login --with-token <<< $GITHUB_TOKEN
+        run: echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
       - name: Rerun main job
         run: gh workflow run run.yml
