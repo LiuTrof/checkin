@@ -1,3 +1,9 @@
+const { fetch, setGlobalDispatcher, Agent } = require('undici')
+
+setGlobalDispatcher(new Agent({
+  connect: { timeout: 10000 } // 设置超时时间为 10 秒
+}))
+
 const glados = async () => {
   const cookie = process.env.GLADOS
   if (!cookie) return
