@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 const testConnection = async () => {
   try {
     const response = await fetch('https://glados.rocks');
