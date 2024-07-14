@@ -1,4 +1,4 @@
-const { fetch, setGlobalDispatcher, Agent } = require('undici')
+import { fetch, setGlobalDispatcher, Agent } from 'undici'
 
 setGlobalDispatcher(new Agent({
   connect: { timeout: 10000 } // 设置超时时间为 10 秒
