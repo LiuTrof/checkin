@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 const testConnection = async () => {
   try {
     const response = await fetch('https://glados.rocks');
@@ -72,20 +70,13 @@ const notify = async (contents) => {
 };
 
 const main = async () => {
-  const timeout = setTimeout(() => {
-    console.error('Script timed out');
-    process.exit(1);
-  }, 3 * 60 * 1000); // 3 minutes
-
   try {
     await testConnection();
     const gladosResult = await glados();
     await notify(gladosResult);
   } catch (error) {
     console.error('Error in main:', error);
-    process.exit(1);
   } finally {
-    clearTimeout(timeout);
     process.exit(0);
   }
 };
