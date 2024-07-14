@@ -16,7 +16,22 @@ jobs:
           node-version: 20
       - run: npm ci
       - run: npm install node-fetch
-      - run: npm run main
+      - name: Run main.js with timeout
+        run: |
+          timeout 180 npm run main || exit 1
         env:
           GLADOS: ${{ secrets.GLADOS }}
           NOTIFY: ${{ secrets.NOTIFY }}
+      - name: Check if script failed
+        if: failure()
+        run: |
+          echo "Script failed, retrying..."
+          echo "::set-output name=retry::true"
+  
+  retry:
+    needs: run
+    if: needs.run.outputs.retry == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Rerun main job
+        run: gh workflow run run.yml
