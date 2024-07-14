@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
   schedule:
-    - cron: 42 3 * * *
+    - cron: '42 3 * * *'
 
 jobs:
   run:
@@ -17,21 +17,31 @@ jobs:
       - run: npm ci
       - run: npm install node-fetch
       - name: Run main.js with timeout
+        id: run-main
         run: |
           timeout 180 npm run main || exit 1
         env:
           GLADOS: ${{ secrets.GLADOS }}
           NOTIFY: ${{ secrets.NOTIFY }}
-      - name: Check if script failed
+      - name: Set retry flag if script failed or timed out
         if: failure()
-        run: |
-          echo "Script failed, retrying..."
-          echo "::set-output name=retry::true"
+        run: echo "::set-output name=retry::true"
+        id: check-failure
   
   retry:
     needs: run
     if: needs.run.outputs.retry == 'true'
     runs-on: ubuntu-latest
     steps:
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+          sudo apt-add-repository https://cli.github.com/packages
+          sudo apt update
+          sudo apt install gh -y
+      - name: Authenticate GitHub CLI
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh auth login --with-token <<< $GITHUB_TOKEN
       - name: Rerun main job
         run: gh workflow run run.yml
