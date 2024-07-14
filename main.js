@@ -26,7 +26,7 @@ const retryFetch = async (url, options, retries = 3) => {
 
 const glados = async () => {
   const cookie = process.env.GLADOS;
-  if (!cookie) return;
+  if (!cookie) return ['Checkin Error', 'No cookie provided'];
   try {
     const headers = {
       'cookie': cookie,
@@ -72,8 +72,15 @@ const notify = async (contents) => {
 };
 
 const main = async () => {
-  await notify(await glados());
+  try {
+    await testConnection();
+    const gladosResult = await glados();
+    await notify(gladosResult);
+  } catch (error) {
+    console.error('Error in main:', error);
+  } finally {
+    process.exit(0);
+  }
 };
 
-testConnection();
 main();
