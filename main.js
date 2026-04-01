@@ -1,6 +1,6 @@
 const testConnection = async () => {
   try {
-    const response = await fetch('https://glados.rocks');
+    const response = await fetch('https://glados.cloud');
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -28,15 +28,15 @@ const glados = async () => {
   try {
     const headers = {
       'cookie': cookie,
-      'referer': 'https://glados.rocks/console/checkin',
-      'user-agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)',
+      'referer': 'https://glados.cloud/console/checkin',
+      'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
     };
-    const checkin = await retryFetch('https://glados.rocks/api/user/checkin', {
+    const checkin = await retryFetch('https://glados.cloud/api/user/checkin', {
       method: 'POST',
       headers: { ...headers, 'content-type': 'application/json' },
       body: '{"token":"glados.one"}',
     }).then((r) => r.json());
-    const status = await retryFetch('https://glados.rocks/api/user/status', {
+    const status = await retryFetch('https://glados.cloud/api/user/status', {
       method: 'GET',
       headers,
     }).then((r) => r.json());
