@@ -1,0 +1,79 @@
+name: selftest
+
+# 临时自测 workflow：验证 GitHub Actions 环境下代码可正常运行。
+# 验证完即可删除本文件与 selftest-output.txt。
+# 只在改动本文件时触发，避免日常提交触发签到；结果文件提交不会回环触发（paths 不匹配）。
+
+on:
+  push:
+    paths:
+      - '.github/workflows/selftest.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  selftest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 语法检查
+        run: |
+          node --version
+          node --check main.js
+          node --check guard.js
+          echo "syntax OK"
+
+      - name: 协议监测（railgun.info）
+        run: node guard.js --soft
+        env:
+          DOMAIN: railgun.info
+
+      - name: 真实签到（仅当配置了 GLADOS Secret）
+        id: checkin
+        if: env.GLADOS != ''
+        run: |
+          set +e
+          npm run main > selftest-output.txt 2>&1
+          code=$?
+          cat selftest-output.txt
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit $code
+        env:
+          GLADOS: ${{ secrets.GLADOS }}
+          GLADOS_UA: ${{ secrets.GLADOS_UA }}
+          DOMAIN: ${{ secrets.DOMAIN }}
+          AUTO_EXCHANGE: ${{ secrets.AUTO_EXCHANGE }}
+          EXCHANGE_THRESHOLD: ${{ secrets.EXCHANGE_THRESHOLD }}
+          NOTIFY: ${{ secrets.NOTIFY }}
+
+      - name: 记录未配置 Secret 的情况
+        if: env.GLADOS == ''
+        run: |
+          {
+            echo "未配置 GLADOS Secret，跳过真实签到。"
+            echo "请在 Settings → Secrets and variables → Actions 添加："
+            echo "  GLADOS      = 站点 Cookie 整行"
+            echo "  GLADOS_UA   = 登录浏览器 navigator.userAgent"
+            echo "  DOMAIN      = railgun.info"
+          } > selftest-output.txt
+          cat selftest-output.txt
+        env:
+          GLADOS: ${{ secrets.GLADOS }}
+
+      - name: 提交自测输出
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add selftest-output.txt
+          git commit -m "chore: selftest output [skip ci]" || exit 0
+          git push
