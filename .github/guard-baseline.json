@@ -1,0 +1,31 @@
+{
+  "sites": {
+    "glados.cloud": {
+      "salt": "glados-observe-v1",
+      "endpoints": [
+        "/user/checkin",
+        "/user/checkin/challenge"
+      ],
+      "captcha": {
+        "domains": [
+          "challenges.cloudflare.com"
+        ],
+        "fields": []
+      },
+      "mode": "challenge"
+    },
+    "railgun.info": {
+      "mode": "simple",
+      "salt": null,
+      "endpoints": [
+        "/user/checkin"
+      ],
+      "simpleSubmit": true,
+      "captcha": {
+        "domains": [],
+        "fields": []
+      }
+    }
+  },
+  "checkedAt": "2026-11-22T10:06:58.510Z"
+}
