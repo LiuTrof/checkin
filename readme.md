@@ -35,6 +35,10 @@ GLaDOS 官方调整了签到积分系统（新增 challenge/proof 校验），�
 ### 使用 railgun.info
 
 1. 在仓库 **Settings → Secrets and variables → Actions** 里新增 Secret `DOMAIN`，值为 `railgun.info`
+
+   > ⚠️ **这一步不能漏**：`DOMAIN` 未配置时脚本默认访问 `glados.cloud`，
+   > 拿 railgun.info 的 Cookie 去请求会返回 `code=-2`。脚本现在会直接提示
+   > 「Cookie 属于 railgun.info 但目标域名是 glados.cloud」，看到该提示补上 `DOMAIN` 即可。
 2. Secret `GLADOS` 填 railgun.info 的 Cookie，最少两项即可：
 
    ```

@@ -379,6 +379,23 @@ const glados = async () => {
       console.log(`[${tag}] 目标域名: ${domain}`)
       console.log(`[${tag}] UA(${account.uaSource}): ${mask(ua, 8, 8)}`)
 
+      // Cookie 与域名不匹配是最常见的失败原因（railgun 的 Cookie 打 glados.cloud 必返回 -2），
+      // 提前给出明确提示，免得对着 code=-2 猜。
+      const cookieLooksRailgun = diag.flavor.startsWith('koa:sess')
+      const domainLooksRailgun = /railgun/i.test(domain)
+      if (cookieLooksRailgun && !domainLooksRailgun) {
+        throw new Error(
+          `Cookie 属于 railgun.info（只有 koa:sess），但当前目标域名是 ${domain}。` +
+            `请在仓库 Secrets 里新增 DOMAIN=railgun.info（未配置时默认 glados.cloud）`
+        )
+      }
+      if (!cookieLooksRailgun && diag.flavor.startsWith('gld:sess') && domainLooksRailgun) {
+        throw new Error(
+          `Cookie 属于 glados.cloud（gld:sess），但当前目标域名是 ${domain}。` +
+            `请把 DOMAIN 改为 glados.cloud，或换用 railgun.info 的 Cookie`
+        )
+      }
+
       // 1. 签到（自动识别 challenge/proof 或简易协议）
       console.log(`[${tag}] 正在执行签到请求...`)
       const action = await doCheckin(domain, headers)
